@@ -5,6 +5,11 @@ ifeq (,$(findstring windows-msvc,$(TARGET)))
   FLAGS += -fPIC
 endif
 
+ifeq (wasm32-unknown-unknown,$(TARGET))
+	# automake gets confused if the OS is "unknown"
+	TARGET = wasm32-unknown-none
+endif
+
 ifeq (armv7-linux-androideabi,$(TARGET))
 	# Reset TARGET variable because armv7 target name used by Rust is not 
 	# the same as the target name needed for the CXX toolchain.
@@ -38,6 +43,11 @@ ifeq (windows,$(findstring windows,$(TARGET)))
 OUT_DIR := $(shell cygpath "$(OUT_DIR)")
 endif
 
+ifeq (wasm32,$(findstring wasm32,$(TARGET)))
+EMCONFIGURE := emconfigure
+else
+EMCONFIGURE :=
+endif
 
 CFLAGS += $(FLAGS)
 CXXFLAGS += $(FLAGS)
@@ -86,7 +96,7 @@ $(OUT_DIR)/Makefile:
 		FREETYPE_CFLAGS="$(FREETYPE_CFLAGS)" \
 		FREETYPE_LIBS="$(FREETYPE_LIBS)" \
 		CFLAGS="$(CFLAGS)" \
-		$(SRC_DIR)/configure \
+		$(EMCONFIGURE) $(SRC_DIR)/configure \
 		--disable-docs \
 		--disable-shared \
 		$(EXPAT_FLAGS) \

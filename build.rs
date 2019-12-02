@@ -17,9 +17,12 @@ fn main() {
         }
     }
 
-    assert!(Command::new("make")
+    let (cmd, mut args) = if target.contains("wasm32") { ("emmake", vec!["make"]) } else { ("make", vec![]) };
+    args.extend(&["-R", "-f", "makefile.cargo"]);
+
+    assert!(Command::new(cmd)
         .env("MAKEFLAGS", env::var("CARGO_MAKEFLAGS").unwrap_or_default())
-        .args(&["-R", "-f", "makefile.cargo"])
+        .args(args)
         .status()
         .unwrap()
         .success());
